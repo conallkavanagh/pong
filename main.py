@@ -3,7 +3,6 @@
 import curses
 import keyboard
 import threading
-import multiprocessing
 from time import sleep
 
 
@@ -39,17 +38,21 @@ class Ball(object):
         self.x += self.vel_x
         self.y += self.vel_y
 
+    def check_collisions(self, player):
+        if (self.x - 1 == player.x or self.x + 1 == player.x) and player.y <= self.y < player.y + player.length:
+            self.vel_x = -self.vel_x
+
     def draw(self, stdscr):
         stdscr.addch(self.y, self.x, '0')
 
 
 def p1_movement(stdscr, player):
-    k = 0
+    #k = 0
     while True:
         # check arrow keys pressed and update coords
-        if keyboard.is_pressed('s'): # s
+        if keyboard.is_pressed('s'):
             player.update_pos(1)
-        elif keyboard.is_pressed('w'): # w
+        elif keyboard.is_pressed('w'):
             player.update_pos(-1)
         sleep(0.05)
         #if k == 115: # s
@@ -60,12 +63,12 @@ def p1_movement(stdscr, player):
         
 
 def p2_movement(stdscr, player):
-    k = 0
+    #k = 0
     while True:
         # check arrow keys pressed and update coords
-        if keyboard.is_pressed(keyboard.KEY_DOWN): # s
+        if keyboard.is_pressed(keyboard.KEY_DOWN):
             player.update_pos(1)
-        elif keyboard.is_pressed(keyboard.KEY_UP): # w
+        elif keyboard.is_pressed(keyboard.KEY_UP):
             player.update_pos(-1)
         sleep(0.05)
         #if k == curses.KEY_DOWN: # s
@@ -96,6 +99,8 @@ def main(stdscr):
         player1.draw(stdscr)
         player2.draw(stdscr)
         game_ball.update_ball()
+        game_ball.check_collisions(player1)
+        game_ball.check_collisions(player2)
         game_ball.draw(stdscr)
         sleep(0.05)
 
