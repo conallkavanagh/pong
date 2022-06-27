@@ -2,7 +2,7 @@
 
 import curses
 import keyboard
-import threading
+from random import choice
 from time import sleep
 
 
@@ -11,6 +11,7 @@ class Player(object):
         self.length = 3
         self.x = x
         self.y = curses.LINES // 2
+        self.score = 0
 
     def update_pos(self, y):
         # updates pos and makes sure player is within screen
@@ -20,6 +21,14 @@ class Player(object):
     def draw(self, stdscr):
         for i in range(self.length): 
             stdscr.addch(self.y+i, self.x, '#')
+
+    def movement(self, up, down):
+        # check arrow keys pressed and update coords
+        if keyboard.is_pressed(down):
+            self.update_pos(1)
+        elif keyboard.is_pressed(up):
+            self.update_pos(-1)
+
 
 class Ball(object):
     def __init__(self, y, x):
@@ -45,37 +54,11 @@ class Ball(object):
     def draw(self, stdscr):
         stdscr.addch(self.y, self.x, '0')
 
-
-def p1_movement(stdscr, player):
-    #k = 0
-    while True:
-        # check arrow keys pressed and update coords
-        if keyboard.is_pressed('s'):
-            player.update_pos(1)
-        elif keyboard.is_pressed('w'):
-            player.update_pos(-1)
-        sleep(0.05)
-        #if k == 115: # s
-        #    player.update_pos(1)
-        #elif k == 119: # w
-        #    player.update_pos(-1)
-        #k = stdscr.getch()
-        
-
-def p2_movement(stdscr, player):
-    #k = 0
-    while True:
-        # check arrow keys pressed and update coords
-        if keyboard.is_pressed(keyboard.KEY_DOWN):
-            player.update_pos(1)
-        elif keyboard.is_pressed(keyboard.KEY_UP):
-            player.update_pos(-1)
-        sleep(0.05)
-        #if k == curses.KEY_DOWN: # s
-        #    player.update_pos(1)
-        #elif k == curses.KEY_UP: # w
-        #    player.update_pos(-1)
-        #k = stdscr.getch()
+    def respawn(self):
+        self.y = curses.LINES // 2
+        self.x = curses.COLS // 2
+        self.vel_x = choice([1,-1])
+        self.vel_y = choice([1,-1])
 
 
 def main(stdscr):
@@ -88,22 +71,47 @@ def main(stdscr):
     game_ball = Ball(curses.LINES // 2, curses.COLS // 2)
 
     # check arrow keys pressed and update coords
-    p1 = threading.Thread(target=p1_movement, args=(stdscr,player1), daemon=True)
-    p2 = threading.Thread(target=p2_movement, args=(stdscr,player2), daemon=True)
-    p1.start()
-    p2.start()
+    #p1 = threading.Thread(target=p1_movement, args=(stdscr,player1), daemon=True)
+    #p2 = threading.Thread(target=p2_movement, args=(stdscr,player2), daemon=True)
+    #p1.start()
+    #p2.start()
 
-    while True:
+    while not keyboard.is_pressed('esc'):
         # init
         stdscr.erase()
+        stdscr.addstr(0, curses.COLS // 2 - 3, 'SCORE')
+        stdscr.addstr(1, curses.COLS // 2 - 6, f'P1: {player1.score} P2: {player2.score}')
+
+        player1.movement('w','s')
+        player2.movement(keyboard.KEY_UP, keyboard.KEY_DOWN)
         player1.draw(stdscr)
         player2.draw(stdscr)
+
         game_ball.update_ball()
         game_ball.check_collisions(player1)
         game_ball.check_collisions(player2)
         game_ball.draw(stdscr)
+
+        if game_ball.x > player2.x:
+            player1.score += 1
+            game_ball.respawn()
+        elif game_ball.x < player1.x:
+            player2.score += 1
+            game_ball.respawn()
+
         sleep(0.05)
 
         stdscr.refresh()
+
+    stdscr.clear()
+    if player1.score > player2.score:
+        stdscr.addstr(curses.LINES // 2, (curses.COLS // 2) - 6, 'Player 1 wins!')
+    elif player1.score < player2.score:
+        stdscr.addstr(curses.LINES // 2, (curses.COLS // 2) - 6, 'Player 2 wins!')
+    else:
+        stdscr.addstr(curses.LINES // 2, (curses.COLS // 2) - 2, 'Draw')
+    stdscr.refresh()
+    
+    sleep(2)
 
 curses.wrapper(main)
