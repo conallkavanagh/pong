@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import curses
-#import keyboard
+import keyboard
 import threading
 import multiprocessing
 from time import sleep
@@ -47,30 +47,32 @@ def p1_movement(stdscr, player):
     k = 0
     while True:
         # check arrow keys pressed and update coords
-        #if keyboard.is_pressed(115): # s
-        #    player.update_pos(1)
-        #elif keyboard.is_pressed(119): # w
-        #    player.update_pos(-1)
-        if k == 115: # s
+        if keyboard.is_pressed('s'): # s
             player.update_pos(1)
-        elif k == 119: # w
+        elif keyboard.is_pressed('w'): # w
             player.update_pos(-1)
-        k = stdscr.getch()
+        sleep(0.05)
+        #if k == 115: # s
+        #    player.update_pos(1)
+        #elif k == 119: # w
+        #    player.update_pos(-1)
+        #k = stdscr.getch()
         
 
 def p2_movement(stdscr, player):
     k = 0
     while True:
         # check arrow keys pressed and update coords
-        #if keyboard.is_pressed(keyboard.KEY_DOWN): # s
-        #    player.update_pos(1)
-        #elif keyboard.is_pressed(keyboard.KEY_UP): # w
-        #    player.update_pos(-1)
-        if k == curses.KEY_DOWN: # s
+        if keyboard.is_pressed(keyboard.KEY_DOWN): # s
             player.update_pos(1)
-        elif k == curses.KEY_UP: # w
+        elif keyboard.is_pressed(keyboard.KEY_UP): # w
             player.update_pos(-1)
-        k = stdscr.getch()
+        sleep(0.05)
+        #if k == curses.KEY_DOWN: # s
+        #    player.update_pos(1)
+        #elif k == curses.KEY_UP: # w
+        #    player.update_pos(-1)
+        #k = stdscr.getch()
 
 
 def main(stdscr):
