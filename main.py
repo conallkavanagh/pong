@@ -8,7 +8,7 @@ from time import sleep
 
 class Player(object):
     def __init__(self, x):
-        self.length = 3
+        self.length = 5
         self.x = x
         self.y = curses.LINES // 2
         self.score = 0
@@ -35,7 +35,7 @@ class Ball(object):
         self.x = x
         self.y = y
         self.vel_x = 1
-        self.vel_y = 1
+        self.vel_y = 0
 
     def update_ball(self):
         # check within screen and if at edge change velocity
@@ -48,8 +48,22 @@ class Ball(object):
         self.y += self.vel_y
 
     def check_collisions(self, player):
-        if (self.x - 1 == player.x or self.x + 1 == player.x) and player.y <= self.y < player.y + player.length:
+        third_player = player.length // 3
+        #if (self.x - 1 == player.x or self.x + 1 == player.x) and player.y <= self.y < player.y + player.length:
+        #    self.vel_x = -self.vel_x
+
+        # check if we are colliding
+        if self.x - 1 == player.x or self.x + 1 == player.x and player.y <= self.y < player.y + player.length:
             self.vel_x = -self.vel_x
+            if self.y <= player.y + third_player:
+                # first third go up
+                self.vel_y = -1
+            elif player.y + third_player < self.y <= player.y + third_player * 2:
+                # second third go straight
+                self.vel_y = 0
+            else:
+                # third third go down
+                self.vel_y = 1
 
     def draw(self, stdscr):
         stdscr.addch(self.y, self.x, '0')
